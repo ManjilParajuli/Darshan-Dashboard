@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darshan Magic Mirror - Cloud Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tagline {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f4ff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.offline {
+            background: #ef4444;
+            animation: none;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #4ade80;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .control-section {
+            margin-bottom: 25px;
+        }
+        .control-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+        .btn-secondary:hover {
+            background: #e0e7ff;
+        }
+        .data-display {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+        .setup-steps {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        .setup-steps h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .setup-steps ol {
+            padding-left: 20px;
+        }
+        .setup-steps li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .setup-steps code {
+            background: #f0f4ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .team-section {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .team-member {
+            background: #f0f4ff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🪞 Darshan Magic Mirror</h1>
+            <p class="tagline">IoT-Powered Smart Mirror Cloud Dashboard</p>
+            <div class="status-indicator">
+                <span class="status-dot offline" id="statusDot"></span>
+                <span id="connectionStatus">Not Connected</span>
+            </div>
+        </header>
+        <div class="info-box">
+            <h3>🎯 Welcome to Darshan Cloud Platform</h3>
+            <p>Control your smart magic mirror remotely through this cloud-integrated dashboard. Monitor features, check system status, and customize your mirror experience from anywhere!</p>
+        </div>
+        <div class="setup-steps">
+            <h3>📋 Setup Instructions</h3>
+            <ol>
+                <li><strong>Upload the Arduino code</strong> to your ESP32 (code provided separately)</li>
+                <li>Open the <strong>Serial Monitor</strong> in Arduino IDE (115200 baud rate)</li>
+                <li>Wait for the ESP32 to connect to WiFi</li>
+                <li>Copy the <strong>IP Address</strong> shown in Serial Monitor (e.g., "IP Address: 192.168.1.100")</li>
+                <li>Paste the IP address in the field below and click "Save & Connect"</li>
+                <li>Test the features using the buttons in the Control Panel</li>
+            </ol>
+        </div>
+        <div id="setupAlert" class="alert alert-info">
+            <strong>⚙️ Setup Required:</strong> Please enter your ESP32 IP address below (check Serial Monitor after uploading the code).
+        </div>
+        <div class="control-panel">
+            <h2 style="color: #667eea; margin-bottom: 25px;">🎛️ Remote Control Panel</h2>
+            
+            <div class="control-section">
+                <h3>ESP32 Configuration</h3>
+                <label for="esp32IP">ESP32 IP Address (from Serial Monitor):</label>
+                <input type="text" id="esp32IP" placeholder="e.g., 192.168.1.100" aria-required="true">
+                <button class="btn btn-secondary" onclick="saveAndConnect()" aria-label="Save and Connect to ESP32">💾 Save & Connect</button>
+            </div>
+            <div class="control-section">
+                <h3>System Status Monitor</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number" id="uptime">0h 0m</div>
+                        <div class="stat-label">ESP32 Uptime</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Available Features</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="esp32Status">Offline</div>
+                        <div class="stat-label">ESP32 Status</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="lastCommand">None</div>
+                        <div class="stat-label">Last Command</div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="checkESP32Status()" style="margin-top: 15px;" aria-label="Refresh Status">🔄 Refresh Status</button>
+            </div>
+            <div class="control-section">
+                <h3>Live System Log</h3>
+                <div class="data-display" id="systemLog">
+                    <span style="color: #10b981;">[INFO]</span> Dashboard initialized<br>
+                    <span style="color: #f59e0b;">[WAITING]</span> Please configure ESP32 IP address above<br>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">🎵</div>
+                    <div class="card-title">Song Feature</div>
+                </div>
+                <ul class="feature-list">
+                    <li>5 Music Categories</li>
+                    <li>Single/Double Tap Control</li>
+                    <li>Auto Category Cycling</li>
+                    <li>Offline Music Playback</li>
+                </ul>
+                <button class="btn btn-primary" onclick="testFeature('song')" style="width: 100%; margin-top: 15px;" aria-label="Test Song Feature">🎵 Test Song Feature</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">⭐</div>
+                    <div class="card-title">Horoscope Feature</div>
+                </div>
+                <ul class="feature-list">
+                    <li>12 Zodiac Signs</li>
+                    <li>Daily Horoscope Updates</li>
+                    <li>API-Powered Predictions</li>
+                    <li>Scrolling Text Display</li>
+                </ul>
+                <button class="btn btn-primary" onclick="testFeature('horoscope')" style="width: 100%; margin-top: 15px;" aria-label="Test Horoscope Feature">⭐ Test Horoscope</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">🌤️</div>
+                    <div class="card-title">Weather Feature</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Real-time Temperature</li>
+                    <li>Current Date & Time</li>
+                    <li>Weather Conditions</li>
+                    <li>Location-based Data</li>
+                </ul>
+                <button class="btn btn-primary" onclick="testFeature('weather')" style="width: 100%; margin-top: 15px;" aria-label="Test Weather Feature">🌤️ Test Weather</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">📰</div>
+                    <div class="card-title">News Feature</div>
+                </div>
+                <ul class="feature-list">
+                    <li>Top 5 Headlines</li>
+                    <li>Live News Updates</li>
+                    <li>Headline Cycling</li>
+                    <li>Scrolling Display</li>
+                </ul>
+                <button class="btn btn-primary" onclick="testFeature('news')" style="width: 100%; margin-top: 15px;" aria-label="Test News Feature">📰 Test News</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: white;">💝</div>
+                    <div class="card-title">Compliment Feature</div>
+                </div>
+                <ul class="feature-list">
+                    <li>33 Unique Compliments</li>
+                    <li>Random Selection</li>
+                    <li>Touch-activated</li>
+                    <li>Multi-line Display</li>
+                </ul>
+                <button class="btn btn-primary" onclick="testFeature('compliment')" style="width: 100%; margin-top: 15px;" aria-label="Test Compliment Feature">💝 Test Compliment</button>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); color: white;">🔊</div>
+                    <div class="card-title">Ultrasonic Detection</div>
+                </div>
+                <ul class="feature-list">
+                    <li>30cm Detection Range</li>
+                    <li>Auto Wake-up</li>
+                    <li>Voice Welcome Message</li>
+                    <li>Auto Sleep (20s)</li>
+                </ul>
+            </div>
+        </div>
+        <footer>
+            <h3 style="color: #667eea; margin-bottom: 15px;">Team Connectors</h3>
+            <div class="team-section">
+                <div class="team-member">Sankalpa Parajuli - 24046057</div>
+                <div class="team-member">Saroj Thapa - 24046062</div>
+                <div class="team-member">Sushil Sigdel - 24046185</div>
+                <div class="team-member">Arjun Rai - 24045829</div>
+                <div class="team-member">Bibek Chaudhary - 24045843</div>
+            </div>
+            <p style="margin-top: 20px; color: #666;">
+                Itahari International College | Supervised by Mr. Anish Pandit<br>
+                Cloud Computing and Internet of Things - Autumn 2025/26
+            </p>
+        </footer>
+    </div>
+    <script>
+        let ESP32_IP = localStorage.getItem('esp32_ip') || "";
+        if (ESP32_IP) {
+            document.getElementById('esp32IP').value = ESP32_IP;
+        }
+
+        function saveAndConnect() {
+            const ip = document.getElementById('esp32IP').value.trim();
+            if (ip && /^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+                localStorage.setItem('esp32_ip', ip);
+                ESP32_IP = ip;
+                addLog('[CONFIG] ESP32 IP address saved: ' + ip, 'success');
+                document.getElementById('setupAlert').style.display = 'none';
+                checkESP32Status();
+            } else {
+                addLog('[ERROR] Invalid IP address format. Please enter a valid IP like 192.168.1.100', 'error');
+            }
+        }
+
+        async function checkESP32Status() {
+            if (!ESP32_IP) {
+                updateConnectionStatus(false);
+                return;
+            }
+            try {
+                const response = await fetch(`http://${ESP32_IP}/status`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updateConnectionStatus(true);
+                    document.getElementById('esp32Status').textContent = 'Online';
+                    document.getElementById('uptime').textContent = data.uptime || 'N/A'; // Fetch real uptime from ESP32
+                    addLog('[SUCCESS] ESP32 connection established at ' + ESP32_IP, 'success');
+                } else {
+                    throw new Error('Bad response');
+                }
+            } catch (error) {
+                updateConnectionStatus(false);
+                document.getElementById('esp32Status').textContent = 'Offline';
+                document.getElementById('uptime').textContent = 'N/A';
+                addLog('[ERROR] Cannot reach ESP32. Check: (1) ESP32 is powered ON, (2) Connected to same WiFi, (3) Correct IP address', 'error');
+            }
+        }
+
+        function updateConnectionStatus(isConnected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('connectionStatus');
+            if (isConnected) {
+                statusDot.classList.remove('offline');
+                statusText.textContent = 'ESP32 Connected';
+            } else {
+                statusDot.classList.add('offline');
+                statusText.textContent = 'ESP32 Offline';
+            }
+        }
+
+        async function testFeature(feature) {
+            if (!ESP32_IP) {
+                addLog('[ERROR] Please configure ESP32 IP address first!', 'error');
+                return;
+            }
+            const featureNames = {
+                song: '🎵 Song Feature',
+                horoscope: '⭐ Horoscope Feature',
+                weather: '🌤️ Weather Feature',
+                news: '📰 News Feature',
+                compliment: '💝 Compliment Feature'
+            };
+            
+            addLog(`[REQUEST] Activating ${featureNames[feature]}...`, 'info');
+            document.getElementById('lastCommand').textContent = featureNames[feature];
+            
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const response = await fetch(`http://${ESP32_IP}/${feature}`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'omit',
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (response.ok) {
+                    addLog(`[SUCCESS] ${featureNames[feature]} activated on mirror!`, 'success');
+                    updateConnectionStatus(true);
+                } else {
+                    throw new Error('Bad response');
+                }
+            } catch (error) {
+                addLog(`[ERROR] Failed to activate feature. Ensure ESP32 is ON and connected. Error: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('systemLog');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let color = '#3b82f6';
+            let prefix = 'INFO';
+            
+            if (type === 'success') {
+                color = '#10b981';
+                prefix = 'SUCCESS';
+            } else if (type === 'error') {
+                color = '#ef4444';
+                prefix = 'ERROR';
+            }
+            
+            log.innerHTML = `<span style="color: ${color};">[${prefix}]</span> [${timestamp}] ${message}<br>` + log.innerHTML;
+            
+            const lines = log.innerHTML.split('<br>');
+            if (lines.length > 30) {
+                log.innerHTML = lines.slice(0, 30).join('<br>');
+            }
+            log.scrollTop = log.scrollHeight;
+        }
+
+        if (ESP32_IP) {
+            setTimeout(() => {
+                checkESP32Status();
+            }, 1000);
+            setInterval(checkESP32Status, 30000); // Check every 30 seconds
+        }
+        addLog('[CLOUD] Dashboard loaded successfully', 'success');
+    </script>
+</body>
+</html>
